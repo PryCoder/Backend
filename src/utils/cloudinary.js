@@ -14,7 +14,7 @@ import { v2 as cloudinary } from 'cloudinary';
 
 
 
-    cosnt uploadOnCloudinary = async (localFilePath) => {
+    const uploadOnCloudinary = async (localFilePath) => {
         try {
             if(!localFilePath) return null
 
