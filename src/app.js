@@ -13,7 +13,9 @@ app.use(express.json({limit:"20kb"}))
 app.use(express.urlencoded({extended:true, limit:"20kb"}))
 app.use(express.static("public"))
 app.use(cookieParser())
-
+app.get("/", (req, res) => {
+    res.send("Server is running!");
+});
 
 
 import userRouter from "./routes/user.routes.js"

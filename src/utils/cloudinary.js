@@ -1,43 +1,46 @@
-import {v2 as cloudinary} from "cloudinary"
+import dotenv from 'dotenv';
+dotenv.config();
+
+import { v2 as cloudinary } from "cloudinary";
 import fs from "fs";
 
 
+console.log("Cloudinary Config: ", {
+    cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+    api_key: process.env.CLOUDINARY_API_KEY,
+    api_secret: process.env.CLOUDINARY_API_SECRET,
+  });
+  
 
+const uploadOnCloudinary = async (localFilePath) => {
+    console.log("Cloudinary Cloud Name: ", process.env.CLOUDINARY_CLOUD_NAME);
+console.log("Cloudinary API Key: ", process.env.CLOUDINARY_API_KEY);
+console.log("Cloudinary API Secret: ", process.env.CLOUDINARY_API_SECRET);
 
+    try {
+        if (!localFilePath) return null;
 
-    // Configuration
-    cloudinary.config({ 
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME, 
-        api_key: process.env.CLOUDINARY_API_KEY, 
-        api_secret: process.env.CLOUDINARY_API_SECRET // Click 'View API Keys' above to copy your API secret
-    });
+        // Upload the file to Cloudinary
+        const response = await cloudinary.uploader.upload(localFilePath, {
+            resource_type: "auto"
+        });
 
-
-
-    const uploadOnCloudinary = async (localFilePath) => {
-        try {
-            if(!localFilePath) return null
-
-           const res = await cloudinary.uploader.upload(localFilePath, {
-                resource_type: "auto"
-            })
-            console.log("file is uploaded",res.url);
-            return res;
+        // Check if the file exists before attempting to delete
+        if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath);
+        } else {
+            console.log(`Temporary file ${localFilePath} already deleted or does not exist.`);
         }
-        catch(error){
-            fs.unlinkSync(localFilePath) //remove the locally saved temporary file as upload operation got failed
+
+        return response;
+    } catch (error) {
+        // If the upload failed, check if the file exists before deleting
+        if (fs.existsSync(localFilePath)) {
+            fs.unlinkSync(localFilePath); // Remove the local file
         }
+        console.error("Cloudinary upload failed: ", error);
+        return null;
     }
-     
-    cloudinary.uploader.upload(
-        'https://res.cloudinary.com/demo/image/upload/getting-started/shoes.jpg', {
-            public_id: 'shoes',
-        }
-    )
-    .catch((error) => {
-        console.log(error);
-    });
- 
- console.log(uploadResult);
+};
 
- export {uploadOnCloudinary};
+export { uploadOnCloudinary };
